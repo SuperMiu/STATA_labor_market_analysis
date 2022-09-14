@@ -1,0 +1,855 @@
+gen area=1 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台北市"
+replace area=1 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="基隆市"
+replace area=1 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="新北市"
+replace area=2 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="桃園市"
+replace area=3 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="新竹市"
+replace area=3 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="新竹縣"
+replace area=3 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="苗栗縣"
+replace area=4 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台中市"
+replace area=5 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="彰化縣"
+replace area=6 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="南投縣"
+replace area=7 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="雲林縣"
+replace area=8 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="嘉義縣"
+replace area=8 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="嘉義市"
+replace area=9 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台南市"
+replace area=10 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="高雄市"
+replace area=11 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="屏東縣"
+replace area=12 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="宜蘭縣"
+replace area=13 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="花蓮縣"
+replace area=14 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台東縣"
+
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"PESO")==1
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"peso")==1
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"RMB")==1
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"rmb")==1
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"工作地點：菲律賓")==1
+replace area=. if ustrregexm(JOBITEMDESCRIPTION,"工作地點：Makati")==1
+
+
+
+//generate time t
+gen time=233 if  20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180630
+replace time=234 if  20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180930
+replace time=235 if  20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace time=236 if  20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace time=237 if  20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190630
+
+
+//generate professional code
+//民意代表、主管及經理人員
+gen prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="經營管理主管"　/*高階主管(總經理及總執行長) (1120-00)*/
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="財務或會計高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="經營管理高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="法務部門高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="金融高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="專案高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="人力資源高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="光電工程研發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="通訊工程研發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="多媒體開發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="軟體工程研發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="行銷企劃高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="品牌宣傳及媒體公關高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="產品企劃高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="品管或品保高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="其他工程研發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="硬體工程研發高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="生產管理高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="國外業務高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="專案業務高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="國內業務高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,11)=="總經理/副總"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="飯店或餐廳高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,11)=="MIS高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="採購高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="營建不動產業高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="電子商務技術高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="廣告企劃高階主管"
+replace prof=112000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="廣告企劃高階主管"
+replace prof=112000 if ustrregexm(JOBITEMJOBCAT_DESCRIPT,"高階主管")==1
+
+
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="行政主管" /*中階主管(經理) (1200-90)*/
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="總務主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="法務／智財主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="廣告企劃主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="行銷企劃主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,28)=="品牌宣傳及媒體公關人員／主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="專案管理主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="客戶服務主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="國內業務主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="國外業務主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="專案業務主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="產品事業處主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="旅遊休閒類主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="飯店或餐廳主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="軟體專案主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="MIS／網管主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="採購主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="資材主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="運輸物流類主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="營建主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="多媒體開發主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="硬體工程研發主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="光電工程研發主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="通訊工程研發主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他工程研發主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="金融專業主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="財務或會計主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="電子商務技術主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="人力資源主管"
+replace prof=120090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="產品企劃主管"
+
+//專業人員
+replace prof=212001 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="精算師"
+
+replace prof=212091 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="數學研究員" /*(212091)數學、精算及統計專業人員*/
+replace prof=212091 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="統計學研究員"
+replace prof=212091 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="統計精算人員"
+
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="品管／品保工程師" /*(214102)品管工程師員*/
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="可靠度工程師"
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="硬體測試工程師"
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="IC封裝／測試工程師"
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="軟韌體測試工程師"
+replace prof=214102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,19)=="EMC／電子安規工程師"
+
+replace prof=213200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="農藝／畜產研究人員"　　/*(213200)農、林、漁、牧業專業人員*/
+
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="工業工程師／生產線規劃" /*(214191)工管及生產工程師*/
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="生產設備工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="生產技術／製程工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="半導體製程工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="自動控制工程師"　
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="半導體設備工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,9)=="SMT工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="LCD製程工程師"
+replace prof=214191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="LCD設備工程師"
+
+replace prof=214200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="土木技師／土木工程師"/*(214200)土木及水利工程師*/
+replace prof=214200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="水利工程師"
+replace prof=214200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="水保技師／水保工程師"
+
+replace prof=214300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,21)=="環境工程人員 / 工程師"/*(214300)環境工程師*/　　
+/*(214402)航空機械工程師*/
+/*(214403)冷凍空調工程師*/
+replace prof=214491 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="機械工程師"/*(214491)機械工程師(含造船、輪機、鑄造)*/
+replace prof=214491 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="機構工程師"
+replace prof=214491 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="機電技師／工程師"
+replace prof=214491 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="廠務"
+replace prof=214491 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="機械設計" /*"機械設計／繪圖人員"*/
+
+replace prof=214502 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="食品研發人員"/*(214502)食品工程師*/
+replace prof=214502 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="食品衛生管理師"
+
+replace prof=214591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="化工化學工程師"/*(214591)化工工程師*/　　
+replace prof=214591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="特用化學工程師"
+replace prof=214591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="化學工程研發人員"
+replace prof=214591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="實驗化驗人員"
+replace prof=214591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="材料研發人員"
+
+/*(214600)地質、採礦、鑽探、冶金工程師*/
+
+replace prof=214901 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="紡織化學工程師"/*(214901)紡織工程師*/
+
+replace prof=214902 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="醫藥研發人員"/*(214902)醫療器材、醫學工程師*/
+replace prof=214902 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="醫療器材研發工程師"
+replace prof=214902 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="病理藥理研究人員"
+
+replace prof=214903 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="生物科技研發人員" /*(214903)生物科學工程師*/
+
+replace prof=214904 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="光學工程師"/*(214904)光學工程師*/
+replace prof=214904 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="光電工程師" 
+
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="電機技師／工程師"/*(215100)電機工程師*/
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="零件工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="半導體工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="類比IC設計工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="數位IC設計工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="硬體研發工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="IC佈局工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="CAD／CAM工程師"
+replace prof=215100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="PCB佈線工程師"
+
+replace prof=215200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="電子工程師"/*(215200)電子工程師*/
+replace prof=215200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="電子產品系統工程師"
+replace prof=215200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="電源工程師"
+replace prof=215200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="微機電工程師"
+replace prof=215200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="太陽能技術工程師"
+
+replace prof=215300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="電信／通訊系統工程師"/*(215300)電信工程師*/
+replace prof=215300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="RF通訊工程師" 
+
+replace prof=216101 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="建築師"/*(216101)建築工程師(含建築師)*/　　
+replace prof=216101 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="結構技師"/*結構技師／結構工程師*/
+replace prof=216101 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="營造工程師"
+
+replace prof=216102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="景觀設計師"/*(216102)景觀設計師*/
+
+replace prof=216200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="都市／交通規劃人員"/*(216200)都市及交通規劃師*/
+
+replace prof=216300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="量測／儀校人員"/*(216300)測量師及製圖師*/
+
+replace prof=217100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="室內設計／裝潢人員" /*(217100)室內設計師*/
+
+replace prof=217200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="多媒體動畫設計師"　　/*(217200)平面及多媒體設計師*/
+replace prof=217200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="平面設計／美編人員"
+replace prof=217200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="網頁設計師"
+replace prof=217200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="美術設計"
+replace prof=311800 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="電腦繪圖人員"
+replace prof=311800 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="影片製作技術人員"
+
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="織品設計"/*(217300)產品及服裝設計師(含工業設計)*/
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="工業設計"
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="服裝／皮包／鞋類設計"
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="包裝設計"
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="商業設計"
+replace prof=217300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="設計助理"
+
+replace prof=225000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="獸醫師"/*(225000)獸醫師*/　　
+
+replace prof=229100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="職業安全衛生管理師"/*(229100)勞安及衛生管理人員(含工業安全管理師)*/
+replace prof=229100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="公共衛生人員"
+replace prof=229100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="職業安全衛生管理員"
+
+replace prof=221090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="醫師"/*(221090)醫師*/
+replace prof=221090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="公共衛生醫師"
+replace prof=221090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="麻醉醫師"
+replace prof=221090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="牙醫師"
+replace prof=221090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="中醫師"
+
+replace prof=222090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="護理師及護士"/*(222090)護理人員*/
+replace prof=222090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="專科護理師"
+
+replace prof=229300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="營養師"/*(229300)營養師*/
+replace prof=226090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="藥師"/*(226090)藥事人員(含藥師)*/
+replace prof=226090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="藥學助理"
+replace prof=229290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="職能治療師"/*(229290)物理、職能(復健)治療師*/
+replace prof=229290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="物理治療師"
+replace prof=229400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="語言治療師"/*(229400)聽力及語言治療師*/
+
+replace prof=229902 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="醫院行政管理人員"/*(229902)醫院管理師*/
+
+replace prof=229991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="醫事放射師"/*(229991)其他醫療保健專業人員*/
+replace prof=229991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="呼吸治療師"
+replace prof=229991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="其他醫療人員"
+
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="升學補習班老師" /*(239190)補教業教師*/
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電腦補習班老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="語文補習班老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="其他補習班老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="數理補習班老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="珠心算老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="其他才藝類老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="美術老師"
+replace prof=239190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="音樂老師"
+
+replace prof=241100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="會計師"　　/*(241100)會(審)計師(含會計稽核)*/
+replace prof=241100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="查帳／審計人員"
+replace prof=241100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="稽核人員"
+replace prof=241100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="稅務人員"
+
+/*(241202)風險控管人員*/
+replace prof=241291 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="金融研究員"/*(241291)財務、經濟及投資分析研究人員*/
+
+replace prof=242100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="營運管理師"/*(242100)專案管理師(含經營管理顧問) org營運管理師／系統整合／ERP專案師*/
+replace prof=242100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="軟體相關專案管理師"
+replace prof=242100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="其他專案管理師"
+replace prof=242100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="顧問人員"
+replace prof=242100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="顧問師"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="遊戲企劃人員"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="產品管理師"
+
+
+/*(242101)稽核人員*/
+/*(242200)人力資源管理師*/
+
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="產品行銷人員" /*廣告及行銷專業人員(含企劃) (2431-00)*/
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="行銷企劃人員"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="活動企劃人員"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="網站行銷企劃"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="媒體公關"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="廣告文案"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="市場調查"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="行銷企劃助理"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="廣告設計"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="產品企劃開發人員"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="傳播媒體企劃人員"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他傳媒相關工作"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="發行企劃／出版人員"
+replace prof=243100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="類目@廣告文案"
+
+replace prof=243200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="媒體公關／宣傳採買"　　/*(243200)公關專業人員*/
+
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="MIS程式設計師" /*(251100)資訊系統分析及設計師*/
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,9)=="MES工程師"
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電腦系統分析師"
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="韌體設計工程師"
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="網路安全分析師"
+replace prof=251100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="BIOS工程師"
+
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="通訊軟體工程師" /*(251290)軟體開發及程式設計師*/
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="軟體設計工程師"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="Internet程式設計師"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電玩程式設計師"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他資訊專業人員"
+replace prof=251290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="演算法開發工程師"
+
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="資料庫管理人員" /*(252090)資料庫及網路專業人員*/
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="網路管理工程師"
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="資料庫管理人員"
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="資訊助理人員"
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="系統維護／操作人員"
+replace prof=252090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="資訊設備管制人員"
+
+replace prof=261100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="律師"　　/*(261100)律師及相關專業人員*/
+replace prof=261901 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="商標／專利人員"　　/*(261901)專利工程師及公證人*/
+replace prof=263590 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="社工人員"　　/*(263590)社工、心理專業人員(含諮商人員)*/
+replace prof=263590 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="心理師"
+
+/*(264100)編輯、作家及有關撰稿人員*/
+
+replace prof=264200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="記者／採編" /*(264200)新聞記者*/
+
+replace prof=264300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="英文翻譯／口譯人員" /*(264300)翻譯人員*/
+replace prof=264300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="日文翻譯／口譯人員"
+replace prof=264300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="其他翻譯／口譯人員"
+
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="演員"/*(265290)表演藝術人員(含演員、配音員)*/
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="模特兒"
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他娛樂事業人員"
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="音樂家／作曲／歌唱及演奏家"
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="舞蹈指導與舞蹈家"
+replace prof=265290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="播音／配音人員"
+
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="燈光／音響師"/*(265400)電影、舞台及有關導演與製作人*/
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="視聽工程類人員"
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,19)=="藝術指導 ／藝術總監"
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="節目製作人員"
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="導演／導播"
+replace prof=265400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="電台工作人員"
+
+replace prof=265600 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="主持人"/*(265600)廣播、電視及其他媒體播報員*/
+
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="物理相關研究員"　　/*(299999)其他專業人員*/
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="天文相關研究員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="氣象相關研究員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="化學相關研究員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="地質與地球科學研究員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="社會／人類學研究人員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,28)=="哲學／歷史／政治相關研究人員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="心理學研究人員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="生物學專業與研究"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="應用科學研究員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="其他研究人員"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="教授／副教授／助理教授"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="助教"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="中等學校教師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="國小學校教師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="特殊教育教師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="講師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="其他類講師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="熱傳工程師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="聲學／噪音工程師"
+replace prof=299999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="其他特殊工程師"
+
+//(300000)技術員及助理專業人員
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="領班"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="工地監工"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="生產管理主管"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="工廠主管"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="品管／品保主管"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="店長／賣場管理人員"
+replace prof=312190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="連鎖店管理人員"
+
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="防火及建築檢驗人員" /*(311200)營建工程技術員(含建築、土木、景觀、測量、水利)*/
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="工程助理"
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="內業工程師"
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="估算人員"
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="發包人員"
+replace prof=311200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="土地開發人員"
+
+replace prof=311300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電機設備裝配員"　　/*(311300)電機技術員*/
+replace prof=311300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="作業員／包裝員"
+replace prof=311300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電機工程技術員"
+replace prof=311300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,19)=="類目@作業員／包裝員"
+
+/*(311400)電子技術員*/
+/*(311502)航空機械技術員*/
+
+replace prof=311503 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="空調冷凍技術人員"　　/*(311503)冷凍空調技術員*/
+
+replace prof=311591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="廠務助理"　　/*(311591)機械技術員(含造船、輪機、鑄造)*/
+replace prof=311591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="產品售後技術服務"
+replace prof=311591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="業務支援工程師"
+replace prof=311591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="產品維修人員"
+replace prof=311591 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="機械裝配員"
+
+/*(311602)食品技術員*/
+/*(311691)化工技術員*/
+
+replace prof=311702 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="測試人員" /*(311702)品管技術員*/
+replace prof=311702 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,3)=="ISO" /*"ISO／品保人員"*/
+replace prof=311702 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="品管／檢驗人員" /*品管／檢驗人員*/
+
+replace prof=311791 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="生管"　　/*(311791)工業及生產技術員*/
+
+replace prof=311800 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="工程配管繪圖" /*(311800)製圖員*/
+replace prof=311800 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="建築設計／繪圖人員"
+replace prof=311800 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="水電及其他工程繪圖人員"
+
+/*(311901)地質、採礦、鑽探、冶金技術員*/
+/*(311902)環境工程技術員*/
+/*(311903)紡織技術員*/
+/*(313100)發電設備操作員*/
+/*(313200)焚化爐、水處理及氣(液)體設備操作員*/
+/*(313300)化學加工設備中央控制員*/
+/*(313400)石油及天然氣精煉設備操作員*/
+/*(313500)金屬生產製程中央控制員*/
+/*(314200)農業技術及農業推廣人員*/
+/*(315190)船舶監管人員(含引水人員)*/
+
+replace prof=315300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="飛行機師" /*(315300)航空駕駛員*/
+
+replace prof=315400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="飛安人員" /*(315400)飛航管制員*/
+
+replace prof=321100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="放射性設備使用技術員"  /*(321100)醫療設備控制技術員*/
+replace prof=321100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="醫療設備控制人員"
+
+replace prof=321200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="醫事檢驗師" /*(321200)醫學及病理檢驗人員*/
+
+replace prof=321400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="牙體技術師" /*(321400)義肢、義齒等人體輔具技術員*/
+
+/*(323000)傳統醫學技術員*/
+
+replace prof=329100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="牙醫助理" /*(329100)牙醫助理*/
+
+/*(329200)病歷管理人員*/
+
+replace prof=329300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="驗光師"　　/*(329300)配鏡、驗光技術員*/
+
+replace prof=329490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="復建技術師"　　/*(329490)物理、職能(復健)治療技術員*/
+replace prof=329490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="治療師"
+
+replace prof=329500 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="安全／衛生相關檢驗人員"/*(329500)勞安及衛生技術員*/
+
+replace prof=329900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他醫療從業人員"　　/*(329900)其他醫療保健助理專業人員*/
+
+replace prof=331100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="金融理財專員"　/*(331100)證券金融交易員及經紀人 (含理財專員)*/
+replace prof=331100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="金融交易員"
+replace prof=331100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="金融營業員"
+replace prof=331100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="金融承銷員"
+
+replace prof=331200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="融資"　　/*(331200)信用及貸款人員 "融資／信用業務人員" */
+replace prof=331300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="主辦會計"  /*(331300)會計人員*/
+replace prof=331300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="成本會計"
+replace prof=331300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="記帳" /*記帳／出納／一般會計*/
+replace prof=331300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="財務會計助理"
+
+/*(331400)統計及精算助理專業人員*/
+
+replace prof=331500 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="財務分析"/*(331500)財物及損失鑑價人員 "財務分析／財務人員"*/
+
+replace prof=331600 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="傳銷人員"/*(331600)承銷人員*/
+
+replace prof=332100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="保險業務／經紀人"/*(332100)保險代理人 (含保險業務員)*/
+
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="國內業務人員"/*(332290)工商業銷售代表(含業務員)*/
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="國外業務人員"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="廣告AE業務人員"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="汽車銷售人員"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="醫藥業務代表"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="通路開發人員"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="業務助理"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="駐校代表"
+replace prof=332290 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="類目@業務助理"
+
+
+replace prof=332300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="採購人員"/*(332300)採購員*/
+replace prof=332300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="採購助理"　　
+
+replace prof=333100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="船務"/*(333100)報關員(含報驗、船務人員) "船務／押匯／報關人員"*/
+replace prof=333100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="保稅人員"
+replace prof=333100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="國貿人員"
+
+replace prof=333200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="展場／櫥窗佈置人員"/*(333200)會議及活動規劃人員*/
+
+/*(333300)職業介紹人及承包人*/
+
+replace prof=333400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="不動產經紀人"/*(333400)不動產經紀人*/
+replace prof=333400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="不動產／商場開發人員"
+replace prof=333400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="不動產產權審核／估價師"
+
+replace prof=334200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="秘書"/*(334200)專業秘書*/
+replace prof=334200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="主管特別助理"
+replace prof=334200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="特別助理"
+
+replace prof=341102 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="代書" /*(341102)土地代書(地政士) "代書／地政士"*/
+replace prof=341191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="法務人員" /*(341191)法務人員*/
+replace prof=341191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="類目@法務人員"
+replace prof=341191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="法務助理"
+replace prof=341191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他法律專業人員"
+replace prof=341191 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="工商登記服務人員"
+
+/*(341200)社會工作助理人員*/
+/*(342100)職業運動員*/
+
+replace prof=342200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="運動教練"　　/*(342200)運動、健身及休閒娛樂指導員*/
+replace prof=342200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,13)=="類目@運動教練"
+
+replace prof=343100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="攝影助理" /*(343100)攝影師、攝影記者*/
+replace prof=343100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="攝影師"
+
+/*(343900)節目助理及舞台相關工作人員*/
+
+replace prof=351090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電腦組裝／測試"　　/*(351090)資訊管理及維護技術員*/
+
+/*(352100)廣播及視聽技術員(含放映員)
+(352200)電信技術員*/
+
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="藝術品／珠寶鑑價／拍賣顧問"　　/*(399999)其他技術員及助理專業人員*/
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="志願役軍官／士官／士兵"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="志工人員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="研究助理"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="雷射操作技術員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="精密拋光技術人員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="農業及林業設備操作員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="助理工程師"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="星象占卜人員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="公家機關相關人員"
+replace prof=399999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="節目助理"
+
+
+//(400000)事務支援人員
+replace prof=411002 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="總務人員"/*總務(4110-02)*/
+
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="工讀生"/*一般辦公室事務人員(含文書) (4110-90)*/
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="行政助理"
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="行政人員"
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="技術文件／說明書編譯"
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="文件管理師"
+replace prof=411090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="圖書資料管理人員"
+
+replace prof=413000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="資料輸入人員" /*資料輸入人員(4130-00)*/
+
+replace prof=421100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="銀行辦事員" /*銀行、郵局櫃台事務人員(4211-00)*/
+
+replace prof=421100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="催收人員"  /*收帳、收費人員(含帳款催收) (4214-00)*/
+
+replace prof=422100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="地勤人員" /*旅遊諮詢人員(含旅行社事務人員) (4221-00)*/
+replace prof=422100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="OP／旅行社人員"
+
+replace prof=422200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="櫃檯接待人員" /*接待員及服務台事務人員(4222-00)*/
+
+replace prof=422300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="總機人員" /*總機人員(4223-00)*/
+
+replace prof=422400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電話客服類人員"  /*電話及網路客服人員(4224-00)*/
+replace prof=422400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他客戶服務人員"
+replace prof=422400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,9)=="FAE工程師"
+
+replace prof=422500 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="市場調查／市場分析"  /*統計調查訪談人員(4225-00)*/
+replace prof=422900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="診所助理"  /*醫院(診所)櫃台事務人員(4229-00)*/
+
+/*會計、簿記、出納(4311-00)*/
+
+replace prof=431202 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="核保／保險內勤人員" /*核保人員(4312-02)*/
+replace prof=431202 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="理賠人員"
+
+replace prof=431291 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="券商後線人員"    /*財務、證券及保險事務人員(4312-91)*/
+replace prof=431291 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="股務人員"
+
+replace prof=432100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="倉管"  /*存貨事務人員(4321-00)*/
+replace prof=432100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="物管／資材"
+
+replace prof=432200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="生管助理" /*生產及物料規劃事務人員(4322-00)*/
+
+replace prof=432300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="運輸交通專業人員" /*運輸事務人員(含稽查、調度、管理) (4323-00)*/
+
+replace prof=491000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="教育訓練人員"   /*人事事務人員(4910-00)*/
+replace prof=491000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="人力／外勞仲介"
+replace prof=491000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="人力資源人員"
+replace prof=491000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="人力資源助理"
+
+/*郵件處理及投遞人員(4992-00)*/
+
+replace prof=499500 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="補習班導師／管理人員" /*教務人員(含班導師、輔導員) (499500)*/
+
+//(500000)服務及銷售工作人員
+replace prof=511190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="空服員"　/*(511190)隨車、船、飛機服務人員(含空服員)*/
+
+replace prof=511300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="導遊" /*(511300)導遊、領隊及解說員*/
+replace prof=511300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="領隊"
+
+replace prof=512090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="中餐廚師" /*(512090)廚師*/
+replace prof=512090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="西餐廚師"
+replace prof=512090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="其他類廚師"
+replace prof=512090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="日式廚師"
+
+replace prof=513100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="調酒師／吧台人員" /*(513100)飲料調配及調酒員*/
+replace prof=513900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="餐飲服務生" /*(513900)餐飲服務人員*/
+replace prof=513900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="類目@類目@餐飲服務生"
+replace prof=513900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,15)=="類目@餐飲服務生"
+
+
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="美容工作者"　/*(514000)美髮、美容及造型設計人員*/
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="美髮工作者"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="整體造型師"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="美姿美儀人員"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="美療／芳療師"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="美甲彩繪師"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="美容類助理"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="美髮類助理"
+replace prof=514000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="美睫師"
+
+
+replace prof=515901 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="飯店工作人員"　　/*(515901)旅館管家*/
+
+/*(515902)宿舍舍監*/
+
+replace prof=519200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="生命禮儀師"　/*(519200)殯葬服務人員*/　　
+
+replace prof=519300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="寵物美容專業人員"　/*(519300)寵物美容師及動物照料工作人員*/　　
+
+replace prof=519901 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="按摩／推拿師"　/*(519901)按摩師*/
+
+/*(519902)伴舞陪酒人員*/
+
+replace prof=522000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="門市／店員／專櫃人員" /*(522000)商店銷售人員(含百貨公司樓管人員)*/
+replace prof=522000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="手工包裝工及有關工作者"
+replace prof=522000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="店長／賣場管理人員"
+replace prof=522000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="儲備幹部"
+
+replace prof=523000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="售票／收銀人員"　　/*(523000)收銀員及售票員*/
+
+/*(529200)展售說明人員*/
+
+replace prof=529400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="電話行銷人員"　　/*(529400)電話及網路行銷人員*/
+replace prof=529500 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="加油員"　　/*(529500)加油站服務員*/
+
+/*(529600)餐食服務櫃台工作人員*/
+
+replace prof=531000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="幼教班老師"  /*(531000)兒童照顧人員(含保母)*/
+replace prof=531000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="安親班老師"
+replace prof=531000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="教保員"
+replace prof=531000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="托育人員"
+
+
+replace prof=532000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="居家服務督導員" /*(532000)健康照顧人員(含看護、月子照護)*/
+replace prof=532000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="照顧指導員"
+replace prof=532000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="安心服務員"
+replace prof=532000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="照顧服務員"
+
+replace prof=540100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="消防員"　　/*(540100)消防人員*/
+replace prof=540100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="消防專業人員"
+
+replace prof=540490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="保全人員"　　/*(540490)建築物管理員、保全及警衛人員 "保全人員／警衛"*/
+replace prof=540490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="保全技術人員"
+replace prof=540490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="大樓管理員"
+replace prof=540490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="總幹事"
+replace prof=540490 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="其他保安服務工作"
+
+replace prof=540901 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="救生員"　　/*(540901)救生員*/
+
+//(600000) 農、林、漁、牧業生產人員
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="農藝作物栽培工作者" /*(601090)園藝及農牧業生產人員*/
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="一般動物飼育工作者"
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="花藝／園藝人員"
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="林木伐運工作者"
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="水產養殖工作者"
+replace prof=601090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="農林漁牧相關類人員"
+
+
+//(700000)技藝、機械設備操作及組裝人員
+replace prof=711100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="砌磚工及砌石工"　　/*(711100)砌磚及有關工作人員*/
+
+/*(711200)砌石、裁石及石雕人員
+　　(711302)鋼筋彎紮人員
+　　(711303)模板人員*/
+
+replace prof=711391 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="混凝土工"/*(711391)混凝土鋪設人員*/
+
+/*(711400)營建木作人員
+　　(711902)廣告招牌製作安裝人員*/
+
+replace prof=711991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="工務人員" /*(711991)其他營建構造人員(含鷹架工)  org工務人員／助理*/
+replace prof=711991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="其他營建構造工及有關工作者"
+replace prof=711991 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="金屬建材架構人員"
+
+/*(712100)屋頂工作人員
+　　(712200)地面、牆面鋪設及磁磚鋪貼人員*/
+
+replace prof=712300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="泥水工"/*(712300)泥作工作人員*/
+replace prof=712300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="泥水小工及有關工作者"
+
+/*(712400)絕緣材料安裝人員
+　　(712500)玻璃安裝人員
+　　(712600)管道裝設人員(含檢修)
+　　(712700)空調及冷凍機械裝修人員*/
+
+replace prof=713100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="油漆工"/*(713100)油漆、噴漆人員(含裱糊工)*/
+replace prof=713100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="噴漆人員"
+replace prof=713100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="塗裝技術人員"
+
+/*(721100)金屬砂模及砂心製造人員*/
+
+replace prof=721200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="焊接及切割技術員"/*(721200)焊接及切割人員(含電焊工、氣焊工)*/
+replace prof=721200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="線切割技術員"
+
+replace prof=721300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="板金技術員"/*(721300)板金人員*/
+
+/*(721400)金屬結構預備及組合人員
+　　(722100)鍛造、錘造及鍛壓工作人員*/
+
+replace prof=722200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="鑄造／鍛造模具技術人員" /*(722200)工具製造人員(含模具工、鉗工)*/
+replace prof=722200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="粉末冶金模具技術人員"
+replace prof=722200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="壓鑄模具技術人員"
+replace prof=722200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="沖壓模具技術人員"
+replace prof=722200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="機械加工技術人員"
+
+replace prof=722300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="車床人員"  /*(722300)金屬工具機設定及操作人員*/
+replace prof=722300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="銑床人員"
+replace prof=722300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,15)=="CNC機台操作人員"
+replace prof=722300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,19)=="CNC電腦程式編排人員"　　
+
+replace prof=723190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="汽車／機車引擎技術人員"　/*(723190)車輛維修人員(含自行車、機車、汽車、火車)*/　　
+replace prof=723190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="其他汽車／機車技術維修人員"
+replace prof=723190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="汽車美容人員"
+
+replace prof=723200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="飛機裝修工"　/*(723200)航空器維修人員*/
+
+replace prof=723300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="農業及工業用機器裝修工"/*(723300)產業用機器維修人員*/
+
+replace prof=731100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="精密儀器製造工及修理工"/*(731100)精密儀器製造及修理人員*/
+
+replace prof=731200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="樂器製造及調音技術員"/*(731200)樂器製造及調音人員*/
+
+replace prof=731300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="珠寶及貴金屬技術員"/*(731300)珠寶及貴金屬製作人員*/
+
+/*(731490)陶瓷製品有關工作人員(含磚瓦)
+　　(731590)玻璃製品製造人員
+　　(731790)各種材質手工藝人員*/
+
+replace prof=732100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="文編／校對／文字工作者"/*(732100)美編及印刷前置人員*/
+replace prof=732100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="排版人員"
+
+replace prof=732200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="印前製作／印刷技術人員"/*(732200)印刷人員*/
+
+/*(732300)裝訂及有關工作人員*/
+
+replace prof=741100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="建築物電力系統維修工"/*(741100)建築物電力系統裝修人員(含水電工)*/
+replace prof=741100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="水電工程師"   
+replace prof=741100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="水電工"
+replace prof=741100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="防水施工人員"
+
+replace prof=741200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="電機裝修工"/*(741200)電力機械裝修人員*/
+replace prof=741200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,15)=="類目@電機裝修工"
+
+replace prof=741300 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="電信及電力線路架設工"/*(741300)電力線路裝修人員*/
+
+replace prof=742100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="電話及電報機裝修工"/*(742100)資(通)訊設備裝修人員(含電信、電話)*/
+replace prof=742100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="通信測試維修人員"
+
+replace prof=742900 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="電子設備裝修工"/*(742900)電子設備裝配維修人員（不含資通訊設備）*/
+
+replace prof=791090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,6)=="麵包師" /*(791090)食品製造及處理人員(含酒類、飲料、製糖、菸葉)*/
+replace prof=791090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="西點／蛋糕師"
+replace prof=791090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="生鮮人員"
+
+/*(791500)食品、飲料試味及分級人員*/
+
+replace prof=792190 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,4)=="木工"/*(792190)木材處理、家具木工及有關工作人員*/
+
+replace prof=793200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="打版人員"/*(793200)服飾打樣及剪裁人員*/
+
+/*(793490)鞣(製)革、毛皮及皮革工作人員*/
+
+replace prof=793590 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,10)=="製鞋類人員"/*(793590)製鞋及有關工作人員*/
+
+/*(799100)潛水人員
+　　(799300)非食品飲料產品分級及檢查人員
+　　(799400)消毒及除蟲有關工作人員
+　　(811190)採礦及採石人員(含爆破人員)
+　　(811200)礦石及石材處理設備操作員
+　　(811300)鑽井及有關工作人員
+　　(811400)水泥相關製品機械操作人員
+　　(812100)金屬製造設備操作員(含熔煉、鑄造、輾軋、熱處理、抽製及擠型等)*/
+
+replace prof=812200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="電鍍／表面處理技術人員"/*(812200)金屬表面處理人員(含電鍍)*/
+
+/*(813100)藥品及化粧品機械操作人員
+　　(813200)照相產品機械操作人員*/
+
+replace prof=813902 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,11)=="PCB技術人員"/*(813902)印刷電路板製造工*/
+
+/*(813903)人造纖維製造設備操作人員
+　　(813904)原油處理工
+　　(813991)化學產品機械操作員(不含藥品、化妝品及照相產品)
+　　(814100)橡膠製品機械操作人員(含輪胎)
+　　(814202)電線、電纜製造工*/
+
+replace prof=814291 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="塑膠射出技術人員"/*(814291)塑膠製品機械操作人員*/
+replace prof=814291 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="塑膠模具技術人員"
+
+/*(814300)紙製品機械操作人員
+　　(815100)纖維準備、紡紗、併紗及撚線機械操作人員*/
+
+replace prof=815200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="紡織工務"/*(815200)紡織及針織機械操作人員*/
+
+replace prof=815390 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="車縫／裁縫類人員"/*(815390)縫製機械操作人員(含裁縫、刺繡)*/
+
+replace prof=815400 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="染整技術人員"/*(815400)染整機械操作人員*/
+
+/*(815790)洗滌工、熨燙工
+　　(817200)紙漿及造紙設備操作人員*/
+
+replace prof=819200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="鍋爐操作技術人員"/*(819200)蒸汽引擎及鍋爐操作人員*/
+
+/*(819300)包裝機械操作人員
+　　(819901)半導體製品機械設備操作人員
+　　(820000)組裝(現場)人員*/
+
+replace prof=831100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="鐵路車輛駕駛員"/*(831100)軌道車輛駕駛人員*/
+
+/*(831200)軌道制動器、號誌及轉轍器操作員*/
+
+replace prof=832100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="外務／快遞／送貨" /*(832100)機車送件駕駛人員*/
+replace prof=832200 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,26)=="小客車／計程車及小貨車司機" /*(832200)小客、貨車駕駛人員*/
+replace prof=833000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,18)=="大貨車及其他類司機" /*(833000)大客、貨車駕駛人員*/
+
+replace prof=834000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,22)=="推土機及有關設備操作員"/*(834000)推土、吊車、起重機等移運設備操作人員*/
+replace prof=834000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,28)=="吊車／起重機及有關設備操作員"
+
+replace prof=835000 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="船長／大副／船員"/*(835000)船舶艙面水手及有關工作人員*/
+
+/*(899902)電池製造工*/
+
+replace prof=899999 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,14)=="其他機械操作員"/*(899999)其他技藝、機械設備操作及組裝人員*/
+
+//(900000)基層技術工及勞力工
+
+replace prof=930090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="倉儲物流人員"/*(930090)勞力工*/
+replace prof=930090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,16)=="派報生／傳單派送"
+replace prof=930090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="家庭代工"
+
+/*(933002)理貨員
+　　(950100)廢棄物收集工及回收資源分類工*/
+
+replace prof=990100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="餐廚助手"　　/*(990100)廚房幫工人員(含速食烹調)*/
+replace prof=990100 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,8)=="洗碗人員"
+
+/*(990200)抄表員及自動販賣機收款員
+　　(990901)遊樂場所服務員
+　　(990902)行李搬運工
+　　(990903)收票員、引座員
+　　(990904)停車場管理工*/
+
+replace prof=911090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="家事服務人員" /*(911090)清潔及家事工作人員(含建築清潔工)*/
+replace prof=911090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,20)=="清潔工／資源回收人員"
+replace prof=911090 if udsubstr(JOBITEMJOBCAT_DESCRIPT,1,12)=="建築物清潔工"
+
+
+/*
+append ...., force
+sort JOBITEMJ JOBITEMJOB JOBITEMNAME
+drop if JOBITEMJ==JOBITEMJ[_n-1] & JOBITEMJOB==JOBITEMJOB[_n-1] & JOBITEMNAME==JOBITEMNAME[_n-1]
+*/
