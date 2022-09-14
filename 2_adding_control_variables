@@ -1,0 +1,379 @@
+drop if area==. /*刪除工作地點不在台灣資料*/
+drop if ind==. /*刪除人力仲介代徵等職缺資料*/
+
+replace JOBITEMSAL_MONTH_HIGH=month_H if JOBITEMSAL_MONTH_HIGH==0 & month_H~=0 & month_L~=0
+replace JOBITEMSAL_MONTH_LOW=month_L if JOBITEMSAL_MONTH_LOW==0 & month_H~=0 & month_L~=0
+replace JOBITEMSAL_MONTH_HIGH=annual_H/13.5 if JOBITEMSAL_MONTH_HIGH==0 & annual_H~=0 & annual_L~=0
+replace JOBITEMSAL_MONTH_LOW=annual_L/13.5 if JOBITEMSAL_MONTH_LOW==0 & annual_H~=0 & annual_L~=0
+replace JOBITEMSAL_MONTH_HIGH=daywage_H*23 if JOBITEMSAL_MONTH_HIGH==0 & daywage_H~=0 & daywage_L~=0
+replace JOBITEMSAL_MONTH_LOW=daywage_L*23  if JOBITEMSAL_MONTH_LOW==0 & daywage_H~=0 & daywage_L~=0
+replace JOBITEMSAL_MONTH_HIGH=hourwage_H*23*8 if JOBITEMSAL_MONTH_HIGH==0 & hourwage_H~=0 & hourwage_L~=0
+replace JOBITEMSAL_MONTH_LOW=hourwage_L*23*8 if  JOBITEMSAL_MONTH_LOW==0 & hourwage_H~=0 & hourwage_L~=0
+
+gen salary= (JOBITEMSAL_MONTH_HIGH + JOBITEMSAL_MONTH_LOW)/2 /*個別職缺的平均薪資*/
+
+replace salary=. if salary==0
+
+/*
+薪資資料整理 資料使用順序 原始雇主自填月薪資料>爬資料獲得之月薪>年薪>日薪>時薪
+salary 個別職缺平均月薪
+rsalary 個別職缺實質平均月薪
+locrincome 個別職缺名目薪資扣除職缺所在地之最低生活成本
+
+rmktwage 實質勞動市場平均月薪
+lnrmktwage 取log後的實質勞動市場平均月薪
+
+mktlocrincome 每個市場扣除COL實質平均月薪
+lnmktlocrincome  每個市場扣除COL實質平均月薪取log
+
+*/
+
+//產生實質薪資 依各月CPI
+gen rsalary=0
+replace rsalary= salary/101.81*100 if 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430 
+replace rsalary= salary/101.58*100 if 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace rsalary= salary/102.02*100 if 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180630
+
+replace rsalary= salary/102.46*100 if 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace rsalary= salary/102.39*100 if 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace rsalary= salary/102.57*100 if 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180930
+
+replace rsalary= salary/102.65*100 if 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace rsalary= salary/102.03*100 if 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181130
+replace rsalary= salary/101.51*100 if 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+
+replace rsalary= salary/101.41*100 if 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace rsalary= salary/102.39*100 if 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190228
+replace rsalary= salary/101.76*100 if 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+
+replace rsalary= salary/102.5*100 if 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190430
+replace rsalary= salary/102.65*100 if 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace rsalary= salary/102.99*100 if 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190630
+
+gen lnrsalary=ln(rsalary)
+
+egen rmktwage= mean(rsalary) if rsalary~=0 & area~=. & ind~=. , by (area prof time) /*每個市場的平均實質薪資*/
+
+gen lnrmktwage= ln(rmktwage) /*市場實質薪資取ln*/
+
+//gen citycode
+gen city=0
+replace city=1 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台北市"
+replace city=3 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="新北市"
+replace city=4 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="桃園市"
+replace city=8 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台中市"
+replace city=14 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="台南市"
+replace city=15 if udsubstr(JOBITEMJOB_ADDR_NO_DESCRIPT,1,6)=="高雄市"
+
+gen sixcity=0
+replace sixcity=1 if city~=0
+
+gen mktsixcity=1 if area== 1 | area==2 | area==4 | area==9 | area==10 /*市場級的六都，ex基隆其實不算六都, 但以市場計算時要算成六都*/
+replace mktsixcity=0 if mktsixcity==.
+
+gen taipei=1 if city==1
+replace taipei=0 if taipei==.
+gen taoyuan=1 if city==4
+replace taoyuan=0 if taoyuan==.
+gen taichung=1 if city==8
+replace taichung=0 if taichung==.
+gen tainan=1 if city==14
+replace tainan=0 if tainan==.
+gen NTPC=1 if city==3
+replace NTPC=0 if NTPC==.
+gen bigtaipei=1 if city==1 | city==3
+replace bigtaipei=0 if bigtaipei==.
+
+//產生 locrincome依地區最低生活成本校正後之超額薪資
+gen locrincome=0 if salary~=0
+//taipei
+replace locrincome= salary-16157 if city==1 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231 
+replace locrincome= salary-16580 if city==1 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//NTPC
+replace locrincome= salary-14385 if city==3 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace locrincome= salary-14666 if city==3 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//taoyuan
+replace locrincome= salary-13692 if city==4 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace locrincome= salary-14578 if city==4 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//taichung
+replace locrincome= salary-13813 if city==8
+
+//tainan
+replace locrincome= salary-12388 if city==14
+
+//kaoshuang
+replace locrincome= salary-12941 if city==15 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace locrincome= salary-13099 if city==15 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//other
+replace locrincome= salary-12388 if city==0
+
+gen lnlocrincome= ln(locrincome)
+
+egen mktlocrincome= mean(locrincome) if rsalary~=0 & area~=. & ind~=. , by (area prof time) /*每個市場扣除COL實質薪資*/
+
+gen lnmktlocrincome= ln(mktlocrincome) /*市場扣除COL實質薪資取ln*/
+
+//產生 依地區最低生活成本之控制變數
+gen localcol=0
+//taipei
+replace localcol= 16157 if city==1 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231 
+replace localcol= 16580 if city==1 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//NTPC
+replace localcol= 14385 if city==3 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace localcol= 14666 if city==3 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//taoyuan
+replace localcol= 13692 if city==4 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace localcol= 14578 if city==4 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//taichung
+replace localcol= 13813 if city==8
+
+//tainan
+replace localcol= 12388 if city==14
+
+//kaoshuang
+replace localcol= 12941 if city==15 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace localcol= 13099 if city==15 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20191231
+
+//other
+replace localcol= 12388 if city==0
+
+//產生市場平均生活成本
+egen mktlocalcol= mean(localcol) if rsalary~=0 & area~=. & ind~=. , by (area prof time)
+
+gen lnmktcol= ln(mktlocalcol)
+
+
+//職業別中分類
+gen midprof=0
+replace midprof=1 if  100000<=prof & prof<=199999 /*民意代表、主管及經理人員*/
+replace midprof=2 if  200000<=prof & prof<=299999 /*專業人員*/
+replace midprof=3 if  300000<=prof & prof<=399999 /*技術員及助理專業人員*/
+replace midprof=4 if  400000<=prof & prof<=499999 /*事務支援人員*/
+replace midprof=5 if  500000<=prof & prof<=599999 /*服務及銷售工作人員*/
+replace midprof=6 if  600000<=prof & prof<=699999 /*農、林、漁、牧業生產人員*/
+replace midprof=7 if  700000<=prof & prof<=999999 /*技藝有關工作人員、機械設備操作及勞力工*/
+
+//放入個別職缺失業率% 只有職缺大類 全國各月份失業率
+gen unemprate=0
+replace unemprate=0.91 if  100000<=prof & prof<=199999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=0.84 if  100000<=prof & prof<=199999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=0.80 if  100000<=prof & prof<=199999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=1.96 if  100000<=prof & prof<=199999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=1.99 if  100000<=prof & prof<=199999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=0.47 if  100000<=prof & prof<=199999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=0.29 if  100000<=prof & prof<=199999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=0.37 if  100000<=prof & prof<=199999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=0.46 if  100000<=prof & prof<=199999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=0.42 if  100000<=prof & prof<=199999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=0.03 if  100000<=prof & prof<=199999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=0.19 if  100000<=prof & prof<=199999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=0.80 if  100000<=prof & prof<=199999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=2.15 if  100000<=prof & prof<=199999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=0.90 if  100000<=prof & prof<=199999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=1.61 if  200000<=prof & prof<=299999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=1.78 if  200000<=prof & prof<=299999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=2.15 if  200000<=prof & prof<=299999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=2.42 if  200000<=prof & prof<=299999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=1.95 if  200000<=prof & prof<=299999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=1.33 if  200000<=prof & prof<=299999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=1.71 if  200000<=prof & prof<=299999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=2.13 if  200000<=prof & prof<=299999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=2.11 if  200000<=prof & prof<=299999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=2.23 if  200000<=prof & prof<=299999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=2.23 if  200000<=prof & prof<=299999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=1.61 if  200000<=prof & prof<=299999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=1.51 if  200000<=prof & prof<=299999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=2.06 if  200000<=prof & prof<=299999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=1.69 if  200000<=prof & prof<=299999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=2.68 if  300000<=prof & prof<=399999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=2.68 if  300000<=prof & prof<=399999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=2.21 if  300000<=prof & prof<=399999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=2.34 if  300000<=prof & prof<=399999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=2.24 if  300000<=prof & prof<=399999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=2.41 if  300000<=prof & prof<=399999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=2.28 if  300000<=prof & prof<=399999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=1.86 if  300000<=prof & prof<=399999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=1.80 if  300000<=prof & prof<=399999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=2.29 if  300000<=prof & prof<=399999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=2.38 if  300000<=prof & prof<=399999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=2.02 if  300000<=prof & prof<=399999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=2.52 if  300000<=prof & prof<=399999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=1.90 if  300000<=prof & prof<=399999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=2.61 if  300000<=prof & prof<=399999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=2.75 if  400000<=prof & prof<=499999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=2.96 if  400000<=prof & prof<=499999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=3.18 if  400000<=prof & prof<=499999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=3.12 if  400000<=prof & prof<=499999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=2.88 if  400000<=prof & prof<=499999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=3.34 if  400000<=prof & prof<=499999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=3.00 if  400000<=prof & prof<=499999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=2.85 if  400000<=prof & prof<=499999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=3.41 if  400000<=prof & prof<=499999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=3.03 if  400000<=prof & prof<=499999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=2.87 if  400000<=prof & prof<=499999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=2.33 if  400000<=prof & prof<=499999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=2.46 if  400000<=prof & prof<=499999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=2.42 if  400000<=prof & prof<=499999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=2.65 if  400000<=prof & prof<=499999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=3.66 if  500000<=prof & prof<=599999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=2.8 if  500000<=prof & prof<=599999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=3.03 if  500000<=prof & prof<=599999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=2.83 if  500000<=prof & prof<=599999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=2.85 if  500000<=prof & prof<=599999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=3.04 if  500000<=prof & prof<=599999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=2.96 if  500000<=prof & prof<=599999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=3.32 if  500000<=prof & prof<=599999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=3.56 if  500000<=prof & prof<=599999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=3.23 if  500000<=prof & prof<=599999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=3.2 if  500000<=prof & prof<=599999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=3.52 if  500000<=prof & prof<=599999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=2.95 if  500000<=prof & prof<=599999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=4.27 if  500000<=prof & prof<=599999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=3.3 if  500000<=prof & prof<=599999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=1.27 if  600000<=prof & prof<=699999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=0.84 if  600000<=prof & prof<=699999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=0.39 if  600000<=prof & prof<=699999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=0.27 if  600000<=prof & prof<=699999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=0.54 if  600000<=prof & prof<=699999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=0.47 if  600000<=prof & prof<=699999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=0.19 if  600000<=prof & prof<=699999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=0.91 if  600000<=prof & prof<=699999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=0.52 if  600000<=prof & prof<=699999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=0.38 if  600000<=prof & prof<=699999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=0.54 if  600000<=prof & prof<=699999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=0.80 if  600000<=prof & prof<=699999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=1.42 if  600000<=prof & prof<=699999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=0.12 if  600000<=prof & prof<=699999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=0.16 if  600000<=prof & prof<=699999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+replace unemprate=3.38 if  700000<=prof & prof<=999999 & 20180401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180430
+replace unemprate=3.87 if  700000<=prof & prof<=999999 & 20180501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180531
+replace unemprate=3.8 if  700000<=prof & prof<=999999 & 20180601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180631
+replace unemprate=3.73 if  700000<=prof & prof<=999999 & 20180701 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180731
+replace unemprate=4.11 if  700000<=prof & prof<=999999 & 20180801 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180831
+replace unemprate=3.99 if  700000<=prof & prof<=999999 & 20180901 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20180931
+replace unemprate=4.14 if  700000<=prof & prof<=999999 & 20181001 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181031
+replace unemprate=3.88 if  700000<=prof & prof<=999999 & 20181101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181131
+replace unemprate=3.53 if  700000<=prof & prof<=999999 & 20181201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20181231
+replace unemprate=3.54 if  700000<=prof & prof<=999999 & 20190101 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190131
+replace unemprate=3.89 if  700000<=prof & prof<=999999 & 20190201 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190231
+replace unemprate=4.16 if  700000<=prof & prof<=999999 & 20190301 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190331
+replace unemprate=4.08 if  700000<=prof & prof<=999999 & 20190401 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190431
+replace unemprate=3.43 if  700000<=prof & prof<=999999 & 20190501 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190531
+replace unemprate=3.72 if  700000<=prof & prof<=999999 & 20190601 <=JOBITEMAPPEAR_DATE & JOBITEMAPPEAR_DATE<= 20190631
+
+//放入市場失業率%
+gen mktunemprate=0
+replace mktunemprate=0.80 if  100000<=prof & prof<=199999 & time==233
+replace mktunemprate=0.47 if  100000<=prof & prof<=199999 & time==234
+replace mktunemprate=0.46 if  100000<=prof & prof<=199999 & time==235
+replace mktunemprate=0.19 if  100000<=prof & prof<=199999 & time==236
+replace mktunemprate=0.90 if  100000<=prof & prof<=199999 & time==237
+
+replace mktunemprate=2.15 if  200000<=prof & prof<=299999 & time==233
+replace mktunemprate=1.33 if  200000<=prof & prof<=299999 & time==234
+replace mktunemprate=2.11 if  200000<=prof & prof<=299999 & time==235
+replace mktunemprate=1.61 if  200000<=prof & prof<=299999 & time==236
+replace mktunemprate=1.69 if  200000<=prof & prof<=299999 & time==237
+
+replace mktunemprate=2.21 if  300000<=prof & prof<=399999 & time==233
+replace mktunemprate=2.41 if  300000<=prof & prof<=399999 & time==234
+replace mktunemprate=1.80 if  300000<=prof & prof<=399999 & time==235
+replace mktunemprate=2.02 if  300000<=prof & prof<=399999 & time==236
+replace mktunemprate=2.61 if  300000<=prof & prof<=399999 & time==237
+
+replace mktunemprate=3.18 if  400000<=prof & prof<=499999 & time==233
+replace mktunemprate=3.34 if  400000<=prof & prof<=499999 & time==234
+replace mktunemprate=3.41 if  400000<=prof & prof<=499999 & time==235
+replace mktunemprate=2.33 if  400000<=prof & prof<=499999 & time==236
+replace mktunemprate=2.65 if  400000<=prof & prof<=499999 & time==237
+
+replace mktunemprate=3.03 if  500000<=prof & prof<=599999 & time==233
+replace mktunemprate=3.04 if  500000<=prof & prof<=599999 & time==234
+replace mktunemprate=3.56 if  500000<=prof & prof<=599999 & time==235
+replace mktunemprate=3.52 if  500000<=prof & prof<=599999 & time==236
+replace mktunemprate=3.30 if  500000<=prof & prof<=599999 & time==237
+
+replace mktunemprate=0.39 if  600000<=prof & prof<=699999 & time==233
+replace mktunemprate=0.47 if  600000<=prof & prof<=699999 & time==234
+replace mktunemprate=0.52 if  600000<=prof & prof<=699999 & time==235
+replace mktunemprate=0.80 if  600000<=prof & prof<=699999 & time==236
+replace mktunemprate=0.16 if  600000<=prof & prof<=699999 & time==237
+
+replace mktunemprate=3.8 if  700000<=prof & prof<=999999 & time==233
+replace mktunemprate=3.99 if  700000<=prof & prof<=999999 & time==234
+replace mktunemprate=3.53 if  700000<=prof & prof<=999999 & time==235
+replace mktunemprate=4.16 if  700000<=prof & prof<=999999 & time==236
+replace mktunemprate=3.72 if  700000<=prof & prof<=999999 & time==237
+
+gen lnmktunemprate=log(mktunemprate)
+
+//職缺資料整理
+egen firmno=group(JOBITEMNAME area time) /*依照公司名稱jobitemname產生每個地區-公司的新編碼firmno, 即同一間公司在不同地理區域要算為不同的公司*/
+replace JOBITEMNEED_EMP1=1 if JOBITEMNEED_EMP1==0 /*修正雇主填報錯誤,最高需求人數至少為1*/
+egen vacancies=sum(JOBITEMNEED_EMP1), by (area prof time) /*計算該地區-該職業市場的職缺總數*/
+egen needemp=sum(JOBITEMNEED_EMP1),by (area prof firmno time) /*依地區公司別產生該公司所需該地區-該職業勞工數總和needemp*/
+
+//HHI
+gen firmshare=needemp / vacancies *100 /*各公司在勞動市場的市佔率%*/
+sort area prof time firmno
+replace firmshare=0 if firmno==firmno[_n-1] & area==area[_n-1] & prof==prof[_n-1]  /*避免hhi計算錯誤，一個廠商在一個市場只留下一筆firmshare*/
+egen hhi=sum(firmshare*firmshare), by (area prof time)
+gen logHHI=log(hhi)
+
+egen mktfirmno=count(firmno) if firmno~=firmno[_n-1] , by(area prof time) /*計算該市場中的廠商數目*/
+replace mktfirmno=mktfirmno[_n-1] if mktfirmno==.
+
+//計算市場高等教育程度需求比率
+egen highedu=sum(JOBITEMNEED_EMP1) if JOBITEMMINBINARY_EDU==4 | JOBITEMMINBINARY_EDU==8 | JOBITEMMINBINARY_EDU==16 | JOBITEMMINBINARY_EDU==32 , by(area prof time)
+//JOBITEMMINBINARY_EDU -1:不要求 1:國中小?  2:高中職?   4:專科 8:大學 16:研究所 32:博士
+replace highedu=0 if highedu==. /*沒有要求高等教育的應該要等於0*/
+gen highedurate= highedu/ vacancies *100 /*產生該市場的高等教育職缺需求比率%*/
+
+gen thirdedu=1 if JOBITEMMINBINARY_EDU>=4 /*如為專科以上學歷為1 dummy, 計算個別職缺平均高等教育程度使用*/
+replace thirdedu=0 if thirdedu==.
+
+//計算市場職缺平均年資需求
+egen mktperiod= mean(JOBITEMPERIOD) if area~=. & ind~=. , by (area prof time)
+
+//丟掉非數字的欄位 免得資料太肥
+keep JOBITEMAPPEAR_DATE JOBITEMMINBINARY_EDU JOBITEMNEED_EMP JOBITEMNEED_EMP1 JOBITEMSAL_MONTH_HIGH JOBITEMSAL_MONTH_LOW JOBITEMPERIOD area time prof ind ind2 annual_H annual_L month_H month_L hourwage_H hourwage_L daywage_H daywage_L salary rsalary lnrsalary rmktwage lnrmktwage city sixcity taipei taoyuan taichung tainan NTPC bigtaipei locrincome lnlocrincome mktlocrincome lnmktlocrincome localcol unemprate mktunemprate firmno vacancies needemp mktfirmno firmshare hhi logHHI highedu highedurate
+
+/*
+
+//for HHI_mkt use
+//計算HHI
+sort area firm
+drop if firm==firm[_n-1]
+hhi needemp, by (area prof time)  
+replace hhi_needemp=hhi_needemp*10000
+egen firmno=count(firm) , by(area prof time) 
+gen logHHI=log(hhi_needemp)
+
+/*丟掉地區內重複的公司,避免HHI計算錯誤*/
+/*依據地區及職業計算公司的勞動市場市佔率*/
+/*計算每個市場的雇主數*/
+
+//gen IV=log(1/N)
+gen lnotherfirmno=log(1/firmno)
+egen sum_lnotherfirmno= sum(lnotherfirmno), by(prof time)
+egen count_area=count(area), by (prof time)
+gen IV=(sum_lnotherfirmno - lnotherfirmno)/ (count_area-1)
+
+//丟掉多的資料_產生勞動市場的資料
+egen mktno=group(area prof time)
+sort mktno
+drop if mktno==mktno[_n-1]
+drop if prof==.
