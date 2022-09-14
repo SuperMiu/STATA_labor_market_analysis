@@ -1,0 +1,286 @@
+//敘述統計
+
+//畫散布圖
+graph twoway (lfit lnrmktwage logHHI) (scatter lnrmktwage logHHI) if mktno~=mktno[_n-1]
+
+//利用mktno處理敘述統計問題
+tab area, sum(rsalary)
+tab prof if rmktwage<40000 , sum (hhi)
+
+egen mktno=group(area prof time) /*每個勞動市場產生一個編碼mktno，避免後續以勞動市場為基礎的各項敘述統計計算錯誤*/
+
+sort area mktno
+by area: sum hhi if mktno~=mktno[_n-1] 
+by area: sum vacancies if mktno~=mktno[_n-1] 
+by area: sum mktfirmno if mktno~=mktno[_n-1]
+by area: sum highedurate if mktno~=mktno[_n-1]
+
+
+//全國性敘述統計資料
+summarize hhi if mktno~=mktno[_n-1]
+summarize mktno if mktno~=mktno[_n-1]
+summarize mktfirmno if mktno~=mktno[_n-1]
+summarize highedurate if mktno~=mktno[_n-1]
+
+
+//薪資區域step reg
+xi: reg lnrsalary i.area,r
+outreg2 using lnrsalary_area_reg.xls, replace ctitle (Model_0a)
+
+xi: reg lnrsalary i.area logHHI ,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0b)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0c)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD ,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0d)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol ,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0e)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof ,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0f)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind ,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0g)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0h)
+
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time,r
+outreg2 using lnrsalary_area_reg.xls, append ctitle (Model_0)
+
+//各模型嘗試
+//baseline model
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time,r
+outreg2 using lnrsalary_area_diffmodel.xls, replace ctitle (Model_0)
+
+//不同區間薪資
+//僅用低於薪資中位數以下的樣本
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary<40000,r
+outreg2 using lnrsalary_area_diffmodel.xls, append ctitle (salary<40000)
+
+//僅用高於薪資中位數的樣本
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary>=40000 ,r
+outreg2 using lnrsalary_area_diffmodel.xls, append ctitle (salary>=40000)
+
+//不同區域樣本
+//1.非六都樣本
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==0,r
+outreg2 using lnrsalary_area_diffmodel.xls, append ctitle (notsixcity)
+
+//2.六都樣本
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==1,r
+outreg2 using lnrsalary_area_diffmodel.xls, append ctitle (sixcity)
+
+
+//robustness check
+//2018 data
+xi: reg lnrsalary i.area logHHI i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if JOBITEMAPPEAR_DATE<20190101,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2018.xls, replace ctitle (Model_0)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==0 & JOBITEMAPPEAR_DATE<20190101,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2018.xls, append ctitle (notsixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==1 & JOBITEMAPPEAR_DATE<20190101,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2018.xls, append ctitle (sixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary<40000 & JOBITEMAPPEAR_DATE<20190101,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2018.xls, append ctitle (salary<40000)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary>=40000 & JOBITEMAPPEAR_DATE<20190101,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2018.xls, append ctitle (salary>=40000)
+
+//2019 data 
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2019.xls, replace ctitle (Model_0)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==0 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2019.xls, append ctitle (notsixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if sixcity==1 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2019.xls, append ctitle (sixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary<40000 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2019.xls, append ctitle (salary<40000)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if rsalary>=40000 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_2019.xls, append ctitle (salary>=40000)
+
+//exclude HHI=10000 data
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if hhi~=10000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_exHHI10000.xls, replace ctitle (Model_0)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if hhi~=10000 & sixcity==0,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_exHHI10000.xls, append ctitle (notsixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if hhi~=10000 & sixcity==1,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_exHHI10000.xls, append ctitle (sixcity)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if hhi~=10000 & rsalary<40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_exHHI10000.xls, append ctitle (salary<40000)
+
+xi: reg lnrsalary logHHI i.area i.JOBITEMMINBINARY_EDU JOBITEMPERIOD lnlocalcol i.prof i.ind lnunemprate i.time if hhi~=10000 & rsalary>=40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_exHHI10000.xls, append ctitle (salary>=40000)
+
+//compressed to labor market
+sort mktno
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate  i.time if mktno~=mktno[_n-1] ,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt.xls, replace ctitle (Model_0)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & mktsixcity==0,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt.xls, append ctitle (notsixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & mktsixcity==1,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt.xls, append ctitle (sixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & rmktwage<40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt.xls, append ctitle (rmktwage<40000)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & rmktwage>=40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt.xls, append ctitle (rmktwage>=40000)
+
+//compressed to labor market, exclude market vacancies under30
+sort mktno
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30.xls, replace ctitle (Model_0)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & mktsixcity==0,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30.xls, append ctitle (notsixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & mktsixcity==1,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30.xls, append ctitle (sixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & rmktwage<40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30.xls, append ctitle (rmktwage<40000)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & rmktwage>=40000,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30.xls, append ctitle (rmktwage>=40000)
+
+
+//compressed to labor market_only 2019data
+sort mktno
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate  i.time if mktno~=mktno[_n-1] & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_only2019.xls, replace ctitle (Model_0)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & mktsixcity==0 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_only2019.xls, append ctitle (notsixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & mktsixcity==1 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_only2019.xls, append ctitle (sixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & rmktwage<40000 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_only2019.xls, append ctitle (rmktwage<40000)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & rmktwage>=40000 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_only2019.xls, append ctitle (rmktwage>=40000)
+
+//compressed to labor market, exclude market vacancies under30_only 2019data
+sort mktno
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30_only2019.xls, replace ctitle (Model_0)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & mktsixcity==0 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30_only2019.xls, append ctitle (notsixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & mktsixcity==1 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30_only2019.xls, append ctitle (sixcity)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & rmktwage<40000 & JOBITEMAPPEAR_DATE>20181231 ,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30_only2019.xls, append ctitle (rmktwage<40000)
+
+xi: reg lnrmktwage logHHI i.area highedurate mktperiod lnmktcol i.prof i.ind lnmktunemprate i.time if mktno~=mktno[_n-1] & vacancies>=30 & rmktwage>=40000 & JOBITEMAPPEAR_DATE>20181231,r
+outreg2 using lnrsalary_area_diffmodel_robcheck_labormkt_vacanciesover30_only2019.xls, append ctitle (rmktwage>=40000)
+
+
+
+//六都間排除生活成本差異後薪資比較
+city=1 台北市
+city=3 新北市
+city=4 桃園市
+city=8 台中市
+city=14台南市
+city=15高雄市
+
+
+//台北vs其他
+xi: reg lnlocrincome taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,4)
+outreg2 using citydiff.xls, replace ctitle (Model_taipei_taoyuan) keep(taipei unemprate)
+
+xi: reg lnlocrincome taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,8)
+outreg2 using citydiff.xls, append ctitle (Model_taipei_taichung) keep(taipei unemprate)
+
+xi: reg lnlocrincome taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,14)
+outreg2 using citydiff.xls, append ctitle (Model_taipei_tainan) keep(taipei unemprate)
+
+xi: reg lnlocrincome taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,15)
+outreg2 using citydiff.xls, append ctitle (Model_taipei_kaohsiung) keep(taipei unemprate)
+
+//桃園vs其他
+xi: reg lnlocrincome taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,8)
+outreg2 using citydiff.xls, append ctitle (Model_taoyuan_taichung) keep(taoyuan unemprate)
+
+xi: reg lnlocrincome taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,14)
+outreg2 using citydiff.xls, append ctitle (Model_taoyuan_tainan) keep(taoyuan unemprate)
+
+xi: reg lnlocrincome taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,15)
+outreg2 using citydiff.xls, append ctitle (Model_taoyuan_kaohsiung) keep(taoyuan unemprate)
+
+//台中vs其他
+xi: reg lnlocrincome taichung i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,8,14)
+outreg2 using citydiff.xls, append ctitle (Model_taichung_tainan) keep(taichung unemprate)
+
+xi: reg lnlocrincome taichung i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,8,15)
+outreg2 using citydiff.xls, append ctitle (Model_taichung_kaohsiung) keep(taichung unemprate)
+
+
+//台南vs高雄
+xi: reg lnlocrincome tainan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,14,15)
+outreg2 using citydiff.xls, append ctitle (Model_tainan_kaohsiung) keep(tainan unemprate)
+
+
+//no COL成本比較
+gen lnrsalary=ln(rsalary)
+
+//台北vs其他
+xi: reg lnrsalary taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,4)
+outreg2 using citydiff_noCOL.xls, replace ctitle (Model_taipei_taoyuan) keep(taipei unemprate)
+
+xi: reg lnrsalary taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,8)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taipei_taichung) keep(taipei unemprate)
+
+xi: reg lnrsalary taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,14)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taipei_tainan) keep(taipei unemprate)
+
+xi: reg lnrsalary taipei i.JOBITEMMINBINARY_EDU unemprate i.prof i.ind if inlist(city, 1,3,15)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taipei_kaohsiung) keep(taipei unemprate)
+
+//桃園vs其他
+xi: reg lnrsalary taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,8)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taoyuan_taichung) keep(taoyuan unemprate)
+
+xi: reg lnrsalary taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,14)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taoyuan_tainan) keep(taoyuan unemprate)
+
+xi: reg lnrsalary taoyuan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city, 4,15)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taoyuan_kaohsiung) keep(taoyuan unemprate)
+
+//台中vs其他
+xi: reg lnrsalary taichung i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,8,14)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taichung_tainan) keep(taichung unemprate)
+
+xi: reg lnrsalary taichung i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,8,15)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_taichung_kaohsiung) keep(taichung unemprate)
+
+
+//台南vs高雄
+xi: reg lnrsalary tainan i.prof i.JOBITEMMINBINARY_EDU unemprate i.ind if inlist(city,14,15)
+outreg2 using citydiff_noCOL.xls, append ctitle (Model_tainan_kaohsiung) keep(tainan unemprate)	
+
+
+
+tabulate city, gen(city_d)
+xi: reg rwage city i.prof i.JOBITEMMINBINARY_EDU unemprate i.time,r if city==1 & 3
